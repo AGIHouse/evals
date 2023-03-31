@@ -1,3 +1,5 @@
+This is a fork of the evals repo from OpenAI that allows to evaluate models created outside of OpenAI using the same benchmarks. This provides an opportunity for apple-to-apple comparisons between AGI models of various origins, as long as their input and output specs are aligned.
+
 # Evals
 
 Evals is a framework for evaluating OpenAI models and an open-source registry of benchmarks.
