@@ -8,6 +8,7 @@ import openai
 import time
 import random
 import requests
+from openai import util
 
 
 def generate_dummy_chat_completion():
@@ -99,40 +100,55 @@ def openai_chat_completion_create_retrying(*args, **kwargs):
     return result
 
 
-def agi_answer(endpoint, instruction, question, temperature =0.1, top_p=0.75, top_k=40, beams=4, max_tokens=128):
-    response = requests.post(f'{endpoint}/run/predict', json={
-    	'data': [
-    		instruction,
-    		question,
-    		temperature,
-    		top_p,
-    		top_k,
-    		beams,
-    		max_tokens,
-    	]
-    }).json()
-    
-    return {
-        "choices": [
-            {
-                "finish_reason": "stop",
-                "index": 0,
-                "message": {
-                    "content": response['data'][0],
-                    "role": "assistant"
+def agi_answer(endpoint, instruction, question, temperature=0.1, top_p=0.75, top_k=40, beams=4, max_tokens=128, max_retries=10):
+    for i in range(max_retries):
+        response = requests.post(f'{endpoint}/run/predict', json={
+        	'data': [
+        		instruction,
+        		question,
+        		temperature,
+        		top_p,
+        		top_k,
+        		beams,
+        		max_tokens,
+        	]
+        })
+        
+        if response.status_code == 200:            
+            res = {
+                "choices": [
+                    {
+                        "finish_reason": "stop",
+                        "index": 0,
+                        "message": {
+                            "content": response.json()['data'][0][:1],
+                            "role": "assistant"
+                        }
+                    }
+                ],
+                "created": int(time.time()*1000),
+                "id": f"agi-{random.getrandbits(128)}",
+                "model": "agi",
+                "object": "chat.completion",
+                "usage": {
+                    "completion_tokens": 42,
+                    "prompt_tokens": 42,
+                    "total_tokens": 42
                 }
             }
-        ],
-        "created": int(time.time()*1000),
-        "id": f"agi-{random.getrandbits(128)}",
-        "model": "agi",
-        "object": "chat.completion",
-        "usage": {
-            "completion_tokens": 42,
-            "prompt_tokens": 42,
-            "total_tokens": 42
-        }
-    }
+
+            return util.convert_to_openai_object(
+                res,
+                api_key='dummy-key',
+                api_version=None,
+                organization='davinci-3',
+                engine=None,
+                plain_old_data=False,
+            )
+        
+        time.sleep(1)
+    
+    raise Exception(f"Max retries ({max_retries}) exceeded for {endpoint}")
 
 def agi_completion_create_retrying(*args, **kwargs):
     """
