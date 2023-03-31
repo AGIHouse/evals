@@ -24,6 +24,7 @@ class ModelSpec:
     api_base: Optional[str] = None
 
     is_chat: bool = False
+    is_agi: bool = False
 
     encoding: Optional[str] = None
     organization: Optional[str] = None

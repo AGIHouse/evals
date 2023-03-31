@@ -18,6 +18,7 @@ from evals.record import record_match, record_sampling
 from evals.utils.api_utils import (
     openai_chat_completion_create_retrying,
     openai_completion_create_retrying,
+    agi_completion_create_retrying,
 )
 
 logger = logging.getLogger(__name__)
@@ -73,7 +74,14 @@ def completion_query(
         for key in set(kwargs) | set(model_spec.extra_options)
     }
 
-    if model_spec.is_chat:
+    if model_spec.is_agi:
+        result = agi_completion_create_retrying(
+            model=model_spec.model,
+            api_base=model_spec.api_base,
+            messages=openai_create_prompt,
+            **extra_args,
+        )
+    elif model_spec.is_chat:
         result = openai_chat_completion_create_retrying(
             model=model_spec.model,
             api_base=model_spec.api_base,

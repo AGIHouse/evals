@@ -76,6 +76,7 @@ def n_ctx_from_model_name(model_name: str) -> Optional[int]:
         "gpt-3.5-turbo-": 4096,
         "gpt-4-": 8192,
         "gpt-4-32k-": 32768,
+        "agi-":128,
     }
     DICT_OF_N_CTX_BY_MODEL_NAME: dict[str, int] = {
         "ada": 2048,
@@ -95,6 +96,11 @@ def n_ctx_from_model_name(model_name: str) -> Optional[int]:
         "gpt-4-0314": 8192,
         "gpt-4-32k": 32768,
         "gpt-4-32k-0314": 32768,
+        "agi-7B": 128,
+        "agi-13B": 128,
+        "agi-17B": 128,
+        "agi-30B": 128,
+        "agi-65B": 128,
     }
     # first, look for a prefix match
     for model_prefix, n_ctx in DICT_OF_N_CTX_BY_MODEL_NAME_PREFIX.items():
@@ -115,7 +121,22 @@ class ModelResolver:
         "gpt-4-32k",
         "gpt-4-32k-0314",
         "dummy-chat",
+        "agi-7B",
+        "agi-13B",
+        "agi-17B",
+        "agi-30B",
+        "agi-65B",        
     }
+
+    AGI_MODELS = {
+        "agi-7B",
+        "agi-13B",
+        "agi-17B",
+        "agi-30B",
+        "agi-65B",
+    }
+
+    AGI_MODEL_IDS = [model for model in AGI_MODELS]
 
     DUMMY_MODELS = {
         "dummy-chat",
@@ -132,6 +153,7 @@ class ModelResolver:
                 name=name,
                 model=name,
                 is_chat=(name in self.CHAT_MODELS),
+                is_agi=(name in self.AGI_MODELS),
                 n_ctx=n_ctx_from_model_name(name),
             )
             return result
@@ -140,7 +162,7 @@ class ModelResolver:
 
     @cached_property
     def api_model_ids(self):
-        return [m["id"] for m in openai.Model.list()["data"]]
+        return([m["id"] for m in openai.Model.list()["data"]] + self.AGI_MODEL_IDS)
 
 
 def run(args, model_resolver: ModelResolver, registry: Optional[Registry] = None):
