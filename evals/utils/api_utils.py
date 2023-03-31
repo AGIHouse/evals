@@ -97,6 +97,7 @@ def openai_chat_completion_create_retrying(*args, **kwargs):
     if "error" in result:
         logging.warning(result)
         raise openai.error.APIError(result["error"])
+    print(result)
     return result
 
 
@@ -121,7 +122,7 @@ def agi_answer(endpoint, instruction, question, temperature=0.1, top_p=0.75, top
                         "finish_reason": "stop",
                         "index": 0,
                         "message": {
-                            "content": response.json()['data'][0][:1],
+                            "content": response.json()['data'][0],
                             "role": "assistant"
                         }
                     }
@@ -158,13 +159,11 @@ def agi_completion_create_retrying(*args, **kwargs):
     if kwargs["model"] == "agi-7B":
         endpoint = 'https://191779ad955db5c67f.gradio.live'
     elif kwargs["model"] == "agi-13B":
-        endpoint = 'https://191779ad955db5c67f.gradio.live'
-    elif kwargs["model"] == "agi-17B":
-        endpoint = 'https://191779ad955db5c67f.gradio.live'
+        endpoint = 'https://0ec820c5d8c6a71b62.gradio.live'
     elif kwargs["model"] == "agi-30B":
-        endpoint = 'https://191779ad955db5c67f.gradio.live'
+        endpoint = 'https://3478cd8fef9837298b.gradio.live'
     elif kwargs["model"] == "agi-65B":
-        endpoint = 'https://191779ad955db5c67f.gradio.live'
+        endpoint = ''
 
     instruction = kwargs["messages"][0]['content']
     question = kwargs["messages"][1]['content']
@@ -173,4 +172,5 @@ def agi_completion_create_retrying(*args, **kwargs):
     if "error" in result:
         logging.warning(result)
         raise openai.error.APIError(result["error"])
+
     return result
